@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="fr">
+<head>
+	<meta charset="utf-8">
+	<title>Balances</title>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+	<style>
+		h5 {
+			margin-top: 40px;
+		}
+		.center {
+			text-align: center;
+		}
+		.right {
+			text-align: right;
+		}
+		.row {
+			margin-top: 10px;
+		}
+		.borderLine {
+			margin: 1px 5px;
+			border-width: 1px;
+			border-style: solid;
+			border-color: black;
+		}
+		.arbitrum {
+			background-color: #8d97a9 !important;
+		}
+		.avalanche {
+			background-color: #8f8f8f !important;
+		}
+		.bitcoin {
+			background-color: #ffcc80 !important;
+		}
+		.bsc {
+			background-color: #fff59d !important;
+		}
+		.ethereum {
+			background-color: #eee !important;
+		}
+		.fantom {
+			background-color: #13b5ec !important;
+		}
+		.gnosis {
+			background-color: #80cbc4 !important;
+		}
+		.polygon {
+			background-color: #ce93d8 !important;
+		}
+		.optimism {
+			background-color: #ff0420 !important;
+		}
+		.rsk {
+			background-color: #1aad8d !important;
+		}
+		.tezos {
+			background-color: #13b5ec !important;
+		}
+	</style>
+</head>
+<body>
+	<h1 class="center">Balances</h1>
+
+	<h5 class="center">jFIATS Liquidity available</h5>
+	<div class="row jfiats polygon matic_mainnet"></div>
+	<div class="row jfiats bsc bsc_mainnet"></div>
+	<div class="row jfiats gnosis xdai_mainnet"></div>
+	<div class="row jfiats optimism optimism_mainnet"></div>
+	<div class="row jfiats avalanche avalanche_mainnet"></div>
+
+	<h5 class="center">Liquidity / Blockchain</h5>
+	<div class="row total_liquidity">
+		<div class="col center borderLine ethereum">Mainnet : <span id="total_mainnet" class="right">0</span> $</div>
+		<div class="col center borderLine bitcoin">Bitcoin : <span id="total_bitcoin_mainnet" class="right">0</span> $</div>
+		<div class="col center borderLine polygon">Polygon : <span id="total_matic_mainnet" class="right">0</span> $</div>
+		<div class="col center borderLine bsc">BSC : <span id="total_bsc_mainnet" class="right">0</span> $</div>
+		<div class="col center borderLine gnosis">Gnosis : <span id="total_xdai_mainnet" class="right">0</span> $</div>
+		<div class="col center borderLine avalanche">Avalanche : <span id="total_avalanche_mainnet" class="right">0</span> $</div>
+		<div class="col center borderLine fantom">Fantom : <span id="total_fantom_mainnet" class="right">0</span> $</div>
+		<div class="col center borderLine arbitrum">Arbitrum : <span id="total_arbitrum_mainnet" class="right">0</span> $</div>
+		<div class="col center borderLine optimism">Optimism : <span id="total_optimism_mainnet" class="right">0</span> $</div>
+		<div class="col center borderLine tezos">Tezos : <span id="total_tezos_mainnet" class="right">0</span> $</div>
+		<div class="col center borderLine rsk">RSK : <span id="total_rsk_mainnet" class="right">0</span> $</div>
+	</div>
+
+	<h5 class="center">Total liquidity</h5>
+	<div class="row">
+		<div class="col center"><button id="button_value_update">'Cadabra !</button></div>
+		<div class="col center"><button id="button_check_collateral_liquidity" title="Check minting Collateral Liquidity">Check Jarvis</button></div>
+
+		<div class="col-3 center borderLine ethereum">Total : <span id="total" class="right"></span> $</div>
+		<div class="col-3 center borderLine arbitrum">Total Stable : <span id="total_stable" class="right"></span> $</div>
+		<div class="col-3 center borderLine avalanche">Total Cryptos : <span id="total_crypto" class="right"></span> $</div>
+	</div>
+
+	<table id="table" class="table table-striped table-hover">
+		<thead>
+			<tr>
+				<th scope="col" id="network">Chain</th>
+				<th scope="col" id="reference">Reference</th>
+				<th scope="col" id="symbol">Symbol</th>
+				<th scope="col" id="offramp_balance">Offramp balance</th>
+				<th scope="col" id="automate_balance">Automate balance</th>
+				<th scope="col" id="total_balance">Total balance</th>
+				<th scope="col" id="stable_value">Stable value</th>
+				<th scope="col" id="crypto_value">Crypto value</th>
+			</tr>
+		</thead>
+		<tbody></tbody>
+	</table>
+</body>
+<footer>
+	<script src="https://code.jquery.com/jquery-3.6.1.slim.min.js" type="application/javascript" crossorigin="anonymous"></script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/bootstrap-table@1.21.0/dist/bootstrap-table.min.js" type="application/javascript"></script>
+	<script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js" type="application/javascript"></script>
+	<script src="index.js" type="application/javascript"></script>
+</footer>
+</html>
