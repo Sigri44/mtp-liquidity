@@ -303,7 +303,7 @@ function colorizeRows() {
 				$(this).parent().addClass("bsc")
 				break
 			case "fantom_mainnet":
-				$(this).parent().addClass("bsc")
+				$(this).parent().addClass("fantom")
 				break
 			case "mainnet":
 				$(this).parent().addClass("ethereum")
