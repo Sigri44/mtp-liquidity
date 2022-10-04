@@ -17,6 +17,7 @@ const coingeckoTickers = {
 	"busd": {"ticker": "binance-usd", "price": 0},
 	"dai": {"ticker": "dai", "price": 0},
 	"eth": {"ticker": "ethereum", "price": 0},
+	"euroc": {"ticker": "euro-coin", "price": 0},
 	"eurs": {"ticker": "stasis-eurs", "price": 0},
 	"eurt": {"ticker": "tether-eurt", "price": 0},
 	"ftm": {"ticker": "fantom", "price": 0},
@@ -24,6 +25,7 @@ const coingeckoTickers = {
 	"jchf": {"ticker": "jarvis-synthetic-swiss-franc", "price": 0},
 	"jeur": {"ticker": "jarvis-synthetic-euro", "price": 0},
 	"jgbp": {"ticker": "jarvis-synthetic-british-pound", "price": 0},
+	"lusd": {"ticker": "liquity-usd", "price": 0},
 	"matic": {"ticker": "matic-network", "price": 0},
 	"mai": {"ticker": "mimatic", "price": 0},
 	"rbtc": {"ticker": "rootstock", "price": 0},
@@ -33,6 +35,7 @@ const coingeckoTickers = {
 	"ust": {"ticker": "terrausd", "price": 0},
 	"wbtc": {"ticker": "wrapped-bitcoin", "price": 0},
 	"weth": {"ticker": "weth", "price": 0},
+	"xchf": {"ticker": "cryptofranc", "price": 0},
 	"xdai": {"ticker": "xdai", "price": 0},
 	"xtz": {"ticker": "tezos", "price": 0},
 
