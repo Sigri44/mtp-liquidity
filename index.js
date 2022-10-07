@@ -351,34 +351,38 @@ function colorizeRows() {
 }
 
 function colorizeValues() {
+	// Get max value in stable and crypto
+	let averageStable = Math.max.apply(Math, $(".stable_value").map(function(){ return $(this).text(); }).get()) / 2
+	let averageCrypto = Math.max.apply(Math, $(".crypto_value").map(function(){ return $(this).text(); }).get()) / 2
+
 	// Colorize stable values
 	$(".stable_value").each(function(i,item) {
 		let value = Number(item.innerHTML)
-		let rgb = setRgbGradient(value)
+		let rgb = setRgbGradient(value, averageStable)
 		$(this).parent().css("background-color", "rgb(" + rgb + ")")
 	})
 
 	// Colorize crypto values
 	$(".crypto_value").each(function(i,item) {
 		let value = Number(item.innerHTML)
-		let rgb = setRgbGradient(value)
+		let rgb = setRgbGradient(value, averageCrypto)
 		$(this).parent().css("background-color", "rgb(" + rgb + ")")
 	})
 }
 
-function setRgbGradient(value) {
+function setRgbGradient(value, average) {
 	value--;
 
 	var r,g,b;
 
-	if (value < 4) {
+	if (value < average) {
 		// green to yellow
-		r = Math.floor(255 * (value / 4));
+		r = Math.floor(255 * (value / average));
 		g = 255;
 	} else {
 		// yellow to red
 		r = 255;
-		g = Math.floor(255 * ((4-value%4) / 4));
+		g = Math.floor(255 * ((average - value % average) / average));
 	}
 	b = 0;
 
