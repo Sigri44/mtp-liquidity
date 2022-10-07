@@ -126,14 +126,14 @@ function parseBitcoinBlockchain(btcAddress) {
 		if (btcAddress === offrampBtcAddress) {
 			let offrampBalance = balance.toFixed(4)
 			// let offrampValue = offrampBalance * coingeckoTickers["btc"].price
-			let offrampValue = offrampBalance * mtpTickers["BTCEUR"].price * mtpTickers["EURUSD"]
+			let offrampValue = offrampBalance * mtpTickers["BTCEUR"] * mtpTickers["EURUSD"]
 
 			$("#002 span.offramp_balance").text(offrampBalance)
 			$("#002 span.offramp_value").text(offrampValue.toFixed(2))
 		} else {
 			let automateBalance = balance.toFixed(4)
 			// let automateValue = automateBalance * coingeckoTickers["btc"].price
-			let automateValue = automateBalance * mtpTickers["BTCEUR"].price * mtpTickers["EURUSD"]
+			let automateValue = automateBalance * mtpTickers["BTCEUR"] * mtpTickers["EURUSD"]
 
 			$("#002 span.automate_balance").text(automateBalance)
 			$("#002 span.automate_value").text(automateValue.toFixed(2))
@@ -350,6 +350,41 @@ function colorizeRows() {
     })
 }
 
+function colorizeValues() {
+	// Colorize stable values
+	$(".stable_value").each(function(i,item) {
+		let value = Number(item.innerHTML)
+		let rgb = setRgbGradient(value)
+		$(this).parent().css("background-color", "rgb(" + rgb + ")")
+	})
+
+	// Colorize crypto values
+	$(".crypto_value").each(function(i,item) {
+		let value = Number(item.innerHTML)
+		let rgb = setRgbGradient(value)
+		$(this).parent().css("background-color", "rgb(" + rgb + ")")
+	})
+}
+
+function setRgbGradient(value) {
+	value--;
+
+	var r,g,b;
+
+	if (value < 4) {
+		// green to yellow
+		r = Math.floor(255 * (value / 4));
+		g = 255;
+	} else {
+		// yellow to red
+		r = 255;
+		g = Math.floor(255 * ((4-value%4) / 4));
+	}
+	b = 0;
+
+	return r + "," + g + "," + b;
+}
+
 const checkMintingCollateralLiquidity = async () => {
 	for (network in collateralJarvis) {
 		// Clean table
@@ -413,6 +448,7 @@ $(function(){
 	$('#button_value_update').on('click', function () {
 		calculateLiquidity()
 		colorizeRows()
+		colorizeValues()
 	})
 
 	$('#button_check_collateral_liquidity').on('click', function () {
