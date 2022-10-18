@@ -1,14 +1,61 @@
 const mtpTickers = {}
-const rpcUri = 'https://api.mtpelerin.com/rpc/'
-const currenciesUri = 'https://api.mtpelerin.com/currency_rates/last'
+const mtpRpcUri = 'https://api.mtpelerin.com/rpc/'
+const mtpTokensUri = 'https://api.mtpelerin.com/currencies/tokens'
+const mtpCurrenciesUri = 'https://api.mtpelerin.com/currency_rates/last'
 const coingeckoUri = 'https://api.coingecko.com/api/v3/simple/price?vs_currencies=usd&ids='
 const offrampEthAddress = '0x7fb610713c8404e21676c01c271bb662df6eb63c'
 const automateEthAddress = '0x4f15818dc2Ae5FA84D519D88Cb2CAAe9cd18EE6d'
+const automateThdxAddress = '0xe94799184dfe9a61016c43643029de61b347064c'
 const offrampBtcAddress = '3LgdKdB9x42m4ujae78NcwUXjYW3z45KrX'
 const automateBtcAddress = 'bc1q6e8d0vqketn9p7t9nkukcfz4aupereap3r7j6x'
+const offrampXtzAddress = 'tz1X59JYm8fSFPo3H18wh7VxiRgDCPXMttPM'
+const automateXtzAddress = 'tz1RmwCe94mBkbnwK8nBd5PHNmy6Q38kSx3u'
 const basicAbi = ["function name() view returns (string)","function symbol() view returns (string)","function balanceOf(address) view returns (uint)"]
 const jFiatsAbiV20 = [{"inputs":[],"name":"totalAvailableLiquidity","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"overCollateralization","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"maxTokensCapacity","outputs":[{"internalType":"uint256","name":"maxCapacity","type":"uint256"}],"stateMutability":"view","type":"function"}]
 const jFiatsAbiV21 = [{"inputs":[],"name":"maxTokensCapacity","outputs":[{"internalType":"uint256","name":"maxCapacity","type":"uint256"}],"stateMutability":"view","type":"function"}]
+
+const rpcUris = {
+    "mainnet" : {
+        "type" : "mtp",
+        "uri" : "https://rpc.ankr.com/eth"
+    },
+    "xdai_mainnet" : {
+        "type" : "custom",
+        "uri" : "https://rpc.gnosischain.com/realt"
+    },
+    "bsc_mainnet" : {
+        "type" : "mtp",
+        "uri" : "https://bsc-dataseed2.defibit.io"
+    },
+    "matic_mainnet" : {
+        "type" : "mtp",
+        "uri" : "https://rpc.ankr.com/polygon"
+    },
+    "arbitrum_mainnet" : {
+        "type" : "mtp",
+        "uri" : "https://arb1.arbitrum.io/rpc"
+    },
+    "optimism_mainnet" : {
+        "type" : "custom",
+        "uri" : "https://optimism-mainnet.public.blastapi.io"
+    },
+    "avalanche_mainnet" : {
+        "type" : "mtp",
+        "uri" : "https://rpc.ankr.com/avalanche"
+    },
+    "fantom_mainnet" : {
+        "type" : "mtp",
+        "uri" : "https://rpcapi.fantom.network"
+    },
+    "rsk_mainnet" : {
+        "type" : "mtp",
+        "uri" : "https://mycrypto.rsk.co"
+    },
+    "tezos_mainnet" : {
+        "type" : "custom",
+        "uri" : "https://api.tzkt.io/v1"
+    },
+}
 
 /*
 const coingeckoTickers = {
@@ -93,20 +140,21 @@ const collateralJarvis = {
 			"jEUR": "0x0aA7e2A631198ba957f8335a6FAC6F3B8F53bD0E",
 		},
 	},
-	"optimism_mainnet" : {
+	/*"optimism_mainnet" : {
 		"version": "2.1",
 		"tokens": {
 			"jEUR": "0xECFc0ED8Ed6b2F16E3035d6f4F9C8F864B7a2110",
 		},
-	},
+	},*/
 }
 
+/*
 function forceRecalculateBitcoin() {
 	// Balances
 	let offrampBalance = Number($("#002 span.offramp_balance").text())
 	let automateBalance = Number($("#002 span.automate_balance").text())
 	let totalBalance = offrampBalance + automateBalance
-	$("#002 span.total_balance").text(totalBalance)
+	$("#002 span.total_balance").text(totalBalance.toFixed(4))
 
 	// Values
 	let offrampValue = Number($("#002 span.offramp_value").text())
@@ -114,9 +162,10 @@ function forceRecalculateBitcoin() {
 	let totalValue = offrampValue + automateValue
 	$("#002 span.crypto_value").text(totalValue.toFixed(2))
 }
+*/
 
 function parseBitcoinBlockchain(btcAddress) {
-	fetch("https://blockchain.info/q/addressbalance/" + btcAddress)
+	return fetch("https://blockchain.info/q/addressbalance/" + btcAddress)
 	.then(function(response) {
 		return response.json()
 	})
@@ -138,7 +187,18 @@ function parseBitcoinBlockchain(btcAddress) {
 			$("#002 span.automate_balance").text(automateBalance)
 			$("#002 span.automate_value").text(automateValue.toFixed(2))
 
-			forceRecalculateBitcoin()
+			// Optimize
+			//forceRecalculateBitcoin()
+
+            // Balances
+            let offrampBalance = Number($("#002 span.offramp_balance").text())
+            let totalBalance = offrampBalance + Number(automateBalance)
+            $("#002 span.total_balance").text(totalBalance.toFixed(4))
+
+            // Values
+            let offrampValue = Number($("#002 span.offramp_value").text())
+            let totalValue = offrampValue + Number(automateValue)
+            $("#002 span.crypto_value").text(totalValue.toFixed(2))
 		}
 	})
 }
@@ -170,36 +230,60 @@ const getCoingeckoPrice = async () => {
 
 const getTokensBalance = async (token, i) => {
 	if (token.network === 'bitcoin_mainnet') {
-		getBitcoinBalance()
+		await getBitcoinBalance()
 	} else {
-		let endpoint = rpcUri + token.network
-
-		// Fix Gnosis RPC
-		if (token.network === 'xdai_mainnet') {endpoint = 'https://rpc.gnosischain.com/realt'}
-
-		const provider = new ethers.providers.JsonRpcProvider(endpoint)
-
 		let offrampBalanceFormatted = 0
 		let automateBalanceFormatted = 0
 
 		let toFixed = 4
 		if (token.isStable) {toFixed = 2}
 
-		if (token.address === '0x0000000000000000000000000000000000000000') {
-			const offrampBalance = await provider.getBalance(offrampEthAddress)
-			const automateBalance = await provider.getBalance(automateEthAddress)
+        if (token.network === "tezos_mainnet") {
+            let endpoint = rpcUris[token.network]["uri"]
 
-			offrampBalanceFormatted = Number(ethers.utils.formatEther(offrampBalance))
-			automateBalanceFormatted = Number(ethers.utils.formatEther(automateBalance))
-		} else {
-			const contract = new ethers.Contract(token.address, basicAbi, provider)
+            if (token.address === '0x0000000000000000000000000000000000000000') {
+                var offrampBalance = await fetch(endpoint + '/accounts/' + offrampXtzAddress + "/balance")
+                .then(function(response) {return response.json()})
+                var automateBalance = await fetch(endpoint + '/accounts/' + automateXtzAddress + "/balance")
+                .then(function(response) {return response.json()})
+            } else {
+                var offrampBalance = await fetch(endpoint + '/tokens/balances?account=' + offrampXtzAddress + '&token.contract=' + token.address)
+                .then(function(response) {return response.json()})
+                var automateBalance = await fetch(endpoint + '/tokens/balances?account=' + automateXtzAddress + '&token.contract=' + token.address)
+                .then(function(response) {return response.json()})
+            
+                offrampBalance = offrampBalance[0].balance
+                automateBalance = automateBalance[0].balance
+            }
 
-			const offrampBalance = await contract.balanceOf(offrampEthAddress)
-			const automateBalance = await contract.balanceOf(automateEthAddress)
+            offrampBalanceFormatted = Number(offrampBalance / 1000000)
+            automateBalanceFormatted = Number(automateBalance / 1000000)
+        } else {
+            let endpoint = getRpcEndpoint(token.network)
 
-			offrampBalanceFormatted = Number(ethers.utils.formatUnits(offrampBalance, token.decimals))
-			automateBalanceFormatted = Number(ethers.utils.formatUnits(automateBalance, token.decimals))
-		}
+            const provider = new ethers.providers.JsonRpcProvider(endpoint)
+
+            if (token.address === '0x0000000000000000000000000000000000000000') {
+                const offrampBalance = await provider.getBalance(offrampEthAddress)
+                const automateBalance = await provider.getBalance(automateEthAddress)
+    
+                offrampBalanceFormatted = Number(ethers.utils.formatEther(offrampBalance))
+                automateBalanceFormatted = Number(ethers.utils.formatEther(automateBalance))
+            } else {
+                const contract = new ethers.Contract(token.address, basicAbi, provider)
+    
+                const offrampBalance = await contract.balanceOf(offrampEthAddress)
+                let automateBalance = await contract.balanceOf(automateEthAddress)
+    
+                // THDX
+                /*if (token.address === "0x89d71DfbDD6ebeCd0dfe27D55189F903169d2991") {
+                    automateBalance = await contract.balanceOf(automateThdxAddress)
+                }*/
+    
+                offrampBalanceFormatted = Number(ethers.utils.formatUnits(offrampBalance, token.decimals))
+                automateBalanceFormatted = Number(ethers.utils.formatUnits(automateBalance, token.decimals))
+            }
+        }
 
 		const totalBalance = offrampBalanceFormatted + automateBalanceFormatted
 		const totalBalanceFormatted = totalBalance.toFixed(toFixed)
@@ -245,10 +329,10 @@ const getTokens = async () => {
 	//getCoingeckoPrice()
 
 	// Get MtP tickers
-	getCurrencyRates()
+	await getCurrencyRates()
 
 	// Get MtP tokens
-	const response = await fetch('https://api.mtpelerin.com/currencies/tokens')
+	const response = await fetch(mtpTokensUri)
 	const tokens = await response.json()
 
 	for (i in tokens) {
@@ -263,14 +347,19 @@ const getTokens = async () => {
 		+ '<td><span class="stable_value" class="right">0</span> $</td>'
 		+ '<td><span class="crypto_value" class="right">0</span> $</td></tr>'
 
-		// Kick tezos blockchain
-		if (tokens[i].network !== 'tezos_mainnet') {
-			// Fill tokens balance
-			getTokensBalance(tokens[i], i)
-		}
+        // Fill tokens balance
+        getTokensBalance(tokens[i], i)
 
 		// TODO : Limit debug trace
 		//if (i == '003') {break}
+    }
+}
+
+function getRpcEndpoint(network) {
+    if (rpcUris[network]["type"] === "custom") {
+        return rpcUris[network]["uri"]
+    } else {
+        return mtpRpcUri + network
     }
 }
 
@@ -394,7 +483,7 @@ const checkMintingCollateralLiquidity = async () => {
 		// Clean table
 		$("." + network).empty()
 
-		let endpoint = rpcUri + network
+		let endpoint = getRpcEndpoint(network)
 		const provider = new ethers.providers.JsonRpcProvider(endpoint)
 
 		var abi = undefined
@@ -420,7 +509,7 @@ const checkMintingCollateralLiquidity = async () => {
 
 					var mintableValue = totalAvailableLiquidity / overCollateralization
 					// var mintableAmount = mintableValue / coingeckoTickers[token.toLowerCase()].price
-					var mintableAmount = mintableValue / mtpTickers[token] * mtpTickers["EURUSD"]
+					var mintableAmount = mintableValue / mtpTickers[token + "EUR"]
 					break
 				case "2.1":
 					var collateralAmount = await contract.maxTokensCapacity()
@@ -436,7 +525,7 @@ const checkMintingCollateralLiquidity = async () => {
 
 // Get MtP currencies rate
 const getCurrencyRates = async () => {
-	const response = await fetch(currenciesUri)
+	const response = await fetch(mtpCurrenciesUri)
 	const apiCurrencies = await response.json()
 
 	for (currency in apiCurrencies) {
