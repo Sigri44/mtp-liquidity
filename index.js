@@ -140,12 +140,12 @@ const collateralJarvis = {
 			"jEUR": "0x0aA7e2A631198ba957f8335a6FAC6F3B8F53bD0E",
 		},
 	},
-	/*"optimism_mainnet" : {
+	"optimism_mainnet" : {
 		"version": "2.1",
 		"tokens": {
-			"jEUR": "0xECFc0ED8Ed6b2F16E3035d6f4F9C8F864B7a2110",
+			"jEUR": "0xb145fb1ef8e3b0202af4012f6bebc00e6882a10d",
 		},
-	},*/
+	},
 }
 
 /*
