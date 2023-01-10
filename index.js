@@ -21,7 +21,7 @@ const rpcUris = {
     },
     "xdai_mainnet" : {
         "type" : "custom",
-        "uri" : "https://rpc.gnosischain.com/realt"
+        "uri" : "https://gnosischain-rpc.gateway.pokt.network"
     },
     "bsc_mainnet" : {
         "type" : "mtp",
