@@ -350,7 +350,7 @@ const getTokens = async () => {
         getTokensBalance(tokens[i], i)
 
 		// TODO : Limit debug trace
-		//if (i == '003') {break}
+		if (i == '003') {break}
     }
 }
 
@@ -478,7 +478,7 @@ function setRgbGradient(value, average) {
 }
 
 const checkMintingCollateralLiquidity = async () => {
-	for (network in collateralJarvis) {
+	for (const network in collateralJarvis) {
 		// Clean table
 		$("." + network).empty()
 
@@ -496,44 +496,56 @@ const checkMintingCollateralLiquidity = async () => {
 				break
 			default:
 		}
-
+  
 		// Create an array to hold the promises
 		const promises = []
 
-		Object.keys(collateralJarvis[network].tokens).forEach(async token => {
+		Object.keys(collateralJarvis[network].tokens).forEach(async (token) => {
 			let contractAddress = collateralJarvis[network].tokens[token]
 			const contract = new ethers.Contract(contractAddress, abi, provider)
 
-			let promise;
+			let promise
 			switch (collateralJarvis[network].version) {
 				case "2.0":
-					promise = contract.totalAvailableLiquidity().then(totalAvailableLiquidity => {
-						return contract.overCollateralization().then(overCollateralization => {
-							let mintableValue = totalAvailableLiquidity / overCollateralization
-							let mintableAmount = mintableValue / mtpTickers[token + "EUR"]
-							return { mintableAmount, token }
-						});
-					});
-					break;
+					promise = contract.totalAvailableLiquidity().then((totalAvailableLiquidity) => {
+						return contract.overCollateralization().then((overCollateralization) => {
+						let mintableValue = totalAvailableLiquidity / overCollateralization
+						let mintableAmount = mintableValue / mtpTickers[token + "EUR"]
+						return { mintableAmount, token, network }
+						})
+					})
+					break
 				case "2.1":
-					promise = contract.maxTokensCapacity().then(collateralAmount => {
+					promise = contract
+						.maxTokensCapacity()
+						.then((collateralAmount) => {
 						let mintableAmount = Number(ethers.utils.formatEther(collateralAmount))
-						return { mintableAmount, token }
-					});
+						return { mintableAmount, token, network }
+						})
 					break
 				default:
 			}
 
-			promises.push(promise)
+			promises.push(promise);
 		});
 
-		Promise.all(promises).then(result => {
-			result.forEach(({ mintableAmount, token }) => {
-				$("." + network).append('<div class="col center borderLine"><span id="' + network + '_' +  token + '" class="right"></span>' + mintableAmount.toFixed(2) + ' ' + token + '</div>')
-			});
-		});
+		Promise.all(promises).then((result) => {
+			result.forEach(({ mintableAmount, token, network }) => {
+				$("." + network).append(
+				'<div class="col center borderLine"><span id="' +
+					network +
+					"_" +
+					token +
+					'" class="right"></span>' +
+					mintableAmount.toFixed(2) +
+					" " +
+					token +
+					"</div>"
+				)
+			})
+		})
 	}
-}
+};
 
 // Get MtP currencies rate
 const getCurrencyRates = async () => {
