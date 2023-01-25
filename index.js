@@ -497,28 +497,41 @@ const checkMintingCollateralLiquidity = async () => {
 			default:
 		}
 
-		for (token in collateralJarvis[network].tokens) {
+		// Create an array to hold the promises
+		const promises = []
+
+		Object.keys(collateralJarvis[network].tokens).forEach(async token => {
 			let contractAddress = collateralJarvis[network].tokens[token]
 			const contract = new ethers.Contract(contractAddress, abi, provider)
 
+			let promise;
 			switch (collateralJarvis[network].version) {
 				case "2.0":
-					var totalAvailableLiquidity = await contract.totalAvailableLiquidity()
-					var overCollateralization = await contract.overCollateralization()
-
-					var mintableValue = totalAvailableLiquidity / overCollateralization
-					// var mintableAmount = mintableValue / coingeckoTickers[token.toLowerCase()].price
-					var mintableAmount = mintableValue / mtpTickers[token + "EUR"]
-					break
+					promise = contract.totalAvailableLiquidity().then(totalAvailableLiquidity => {
+						return contract.overCollateralization().then(overCollateralization => {
+							let mintableValue = totalAvailableLiquidity / overCollateralization
+							let mintableAmount = mintableValue / mtpTickers[token + "EUR"]
+							return { mintableAmount, token }
+						});
+					});
+					break;
 				case "2.1":
-					var collateralAmount = await contract.maxTokensCapacity()
-					var mintableAmount = Number(ethers.utils.formatEther(collateralAmount))
+					promise = contract.maxTokensCapacity().then(collateralAmount => {
+						let mintableAmount = Number(ethers.utils.formatEther(collateralAmount))
+						return { mintableAmount, token }
+					});
 					break
 				default:
 			}
 
-			$("." + network).append('<div class="col center borderLine"><span id="' + network + '_' +  token + '" class="right"></span>' + mintableAmount.toFixed(2) + ' ' + token + '</div>')
-		}
+			promises.push(promise)
+		});
+
+		Promise.all(promises).then(result => {
+			result.forEach(({ mintableAmount, token }) => {
+				$("." + network).append('<div class="col center borderLine"><span id="' + network + '_' +  token + '" class="right"></span>' + mintableAmount.toFixed(2) + ' ' + token + '</div>')
+			});
+		});
 	}
 }
 
