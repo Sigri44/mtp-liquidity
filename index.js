@@ -350,7 +350,7 @@ const getTokens = async () => {
         getTokensBalance(tokens[i], i)
 
 		// TODO : Limit debug trace
-		if (i == '003') {break}
+		//if (i == '003') {break}
     }
 }
 
