@@ -335,22 +335,25 @@ const getTokens = async () => {
 	const tokens = await response.json()
 
 	for (i in tokens) {
-		// Fill basic informations
-		document.getElementsByTagName("tbody")[0].innerHTML += '<tr id="' + i + '" class="row_crypto">'
-		+ '<td class="network hidden">' + tokens[i].network + '</td>'
-		+ '<th scope="row">' + i + '</th>'
-		+ '<td class="symbol">' + tokens[i].symbol + '</td>'
-		+ '<td><span class="offramp_balance"></span> (<span class="offramp_value"></span> $)</td>'
-		+ '<td><span class="automate_balance"></span> (<span class="automate_value"></span> $)</td>'
-		+ '<td><span class="total_balance"></span></td>'
-		+ '<td><span class="stable_value" class="right">0</span> $</td>'
-		+ '<td><span class="crypto_value" class="right">0</span> $</td></tr>'
+		// Remove LN network
+		if (i != '080') {
+			// Fill basic informations
+			document.getElementsByTagName("tbody")[0].innerHTML += '<tr id="' + i + '" class="row_crypto">'
+			+ '<td class="network hidden">' + tokens[i].network + '</td>'
+			+ '<th scope="row">' + i + '</th>'
+			+ '<td class="symbol">' + tokens[i].symbol + '</td>'
+			+ '<td><span class="offramp_balance"></span> (<span class="offramp_value"></span> $)</td>'
+			+ '<td><span class="automate_balance"></span> (<span class="automate_value"></span> $)</td>'
+			+ '<td><span class="total_balance"></span></td>'
+			+ '<td><span class="stable_value" class="right">0</span> $</td>'
+			+ '<td><span class="crypto_value" class="right">0</span> $</td></tr>'
 
-        // Fill tokens balance
-        getTokensBalance(tokens[i], i)
+			// Fill tokens balance
+			getTokensBalance(tokens[i], i)
 
-		// TODO : Limit debug trace
-		//if (i == '003') {break}
+			// TODO : Limit debug trace
+			//if (i == '003') {break}
+		}
     }
 }
 
