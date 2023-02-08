@@ -4,6 +4,7 @@ const mtpTokensUri = 'https://api.mtpelerin.com/currencies/tokens'
 const mtpCurrenciesUri = 'https://api.mtpelerin.com/currency_rates/last'
 const coingeckoUri = 'https://api.coingecko.com/api/v3/simple/price?vs_currencies=usd&ids='
 const offrampEthAddress = '0x7fb610713c8404e21676c01c271bb662df6eb63c'
+const newOfframpEthAddress = '0x9a760aa1fe631fd9ac0aee0965736121c7c132cc'
 const automateEthAddress = '0x4f15818dc2Ae5FA84D519D88Cb2CAAe9cd18EE6d'
 const automateThdxAddress = '0xe94799184dfe9a61016c43643029de61b347064c'
 const offrampBtcAddress = '3LgdKdB9x42m4ujae78NcwUXjYW3z45KrX'
@@ -232,6 +233,7 @@ const getTokensBalance = async (token, i) => {
 		await getBitcoinBalance()
 	} else {
 		let offrampBalanceFormatted = 0
+		let newOfframpBalanceFormatted = 0
 		let automateBalanceFormatted = 0
 
 		let toFixed = 4
@@ -264,15 +266,18 @@ const getTokensBalance = async (token, i) => {
 
             if (token.address === '0x0000000000000000000000000000000000000000') {
                 const offrampBalance = await provider.getBalance(offrampEthAddress)
+                const newOfframpBalance = await provider.getBalance(newOfframpEthAddress)
                 const automateBalance = await provider.getBalance(automateEthAddress)
     
                 offrampBalanceFormatted = Number(ethers.utils.formatEther(offrampBalance))
+                newOfframpBalanceFormatted = Number(ethers.utils.formatEther(newOfframpBalance))
                 automateBalanceFormatted = Number(ethers.utils.formatEther(automateBalance))
             } else {
                 const contract = new ethers.Contract(token.address, basicAbi, provider)
     
                 const offrampBalance = await contract.balanceOf(offrampEthAddress)
-                let automateBalance = await contract.balanceOf(automateEthAddress)
+                const newOfframpBalance = await contract.balanceOf(newOfframpEthAddress)
+                const automateBalance = await contract.balanceOf(automateEthAddress)
     
                 // THDX
                 /*if (token.address === "0x89d71DfbDD6ebeCd0dfe27D55189F903169d2991") {
@@ -280,11 +285,12 @@ const getTokensBalance = async (token, i) => {
                 }*/
     
                 offrampBalanceFormatted = Number(ethers.utils.formatUnits(offrampBalance, token.decimals))
+                newOfframpBalanceFormatted = Number(ethers.utils.formatUnits(newOfframpBalance, token.decimals))
                 automateBalanceFormatted = Number(ethers.utils.formatUnits(automateBalance, token.decimals))
             }
         }
 
-		const totalBalance = offrampBalanceFormatted + automateBalanceFormatted
+		const totalBalance = offrampBalanceFormatted + newOfframpBalanceFormatted + automateBalanceFormatted
 		const totalBalanceFormatted = totalBalance.toFixed(toFixed)
 
 		// Values
@@ -301,18 +307,22 @@ const getTokensBalance = async (token, i) => {
 		// const offrampValue = coingeckoTickers[token.symbol.toLowerCase()].price * offrampBalanceFormatted
 		// const automateValue = coingeckoTickers[token.symbol.toLowerCase()].price * automateBalanceFormatted
 		const offrampValue = mtpTickers[token.symbol + "EUR"] * offrampBalanceFormatted * mtpTickers["EURUSD"]
+		const newOfframpValue = mtpTickers[token.symbol + "EUR"] * newOfframpBalanceFormatted * mtpTickers["EURUSD"]
 		const automateValue = mtpTickers[token.symbol + "EUR"] * automateBalanceFormatted * mtpTickers["EURUSD"]
-		const totalValue = offrampValue + automateValue
+		const totalValue = offrampValue + newOfframpValue + automateValue
 
 		const offrampValueFormatted = offrampValue.toFixed(2)
+		const newOfframpValueFormatted = newOfframpValue.toFixed(2)
 		const automateValueFormatted = automateValue.toFixed(2)
 		const totalValueFormatted = totalValue.toFixed(2)
 
 		$("#" + i +" span.offramp_balance").text(offrampBalanceFormatted.toFixed(toFixed))
+		$("#" + i +" span.new_offramp_balance").text(newOfframpBalanceFormatted.toFixed(toFixed))
 		$("#" + i +" span.automate_balance").text(automateBalanceFormatted.toFixed(toFixed))
 		$("#" + i +" span.total_balance").text(totalBalanceFormatted)
 
 		$("#" + i +" span.offramp_value").text(offrampValueFormatted)
+		$("#" + i +" span.new_offramp_value").text(newOfframpValueFormatted)
 		$("#" + i +" span.automate_value").text(automateValueFormatted)
 
 		if (token.isStable) {
@@ -343,6 +353,7 @@ const getTokens = async () => {
 			+ '<th scope="row">' + i + '</th>'
 			+ '<td class="symbol">' + tokens[i].symbol + '</td>'
 			+ '<td><span class="offramp_balance"></span> (<span class="offramp_value"></span> $)</td>'
+			+ '<td><span class="new_offramp_balance"></span> (<span class="new_offramp_value"></span> $)</td>'
 			+ '<td><span class="automate_balance"></span> (<span class="automate_value"></span> $)</td>'
 			+ '<td><span class="total_balance"></span></td>'
 			+ '<td><span class="stable_value" class="right">0</span> $</td>'
