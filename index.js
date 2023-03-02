@@ -17,7 +17,7 @@ const jFiatsAbiV21 = [{"inputs":[],"name":"maxTokensCapacity","outputs":[{"inter
 
 const rpcUris = {
     "mainnet" : {
-        "type" : "mtp",
+        "type" : "custom",
         "uri" : "https://rpc.ankr.com/eth"
     },
     "xdai_mainnet" : {
@@ -33,7 +33,7 @@ const rpcUris = {
         "uri" : "https://rpc.ankr.com/polygon"
     },
     "arbitrum_mainnet" : {
-        "type" : "mtp",
+        "type" : "custom",
         "uri" : "https://arb1.arbitrum.io/rpc"
     },
     "optimism_mainnet" : {
