@@ -2,7 +2,6 @@ const mtpTickers = {}
 const mtpRpcUri = 'https://api.mtpelerin.com/rpc/'
 const mtpTokensUri = 'https://api.mtpelerin.com/currencies/tokens'
 const mtpCurrenciesUri = 'https://api.mtpelerin.com/currency_rates/last'
-const coingeckoUri = 'https://api.coingecko.com/api/v3/simple/price?vs_currencies=usd&ids='
 const offrampEthAddress = '0x7fb610713c8404e21676c01c271bb662df6eb63c'
 const newOfframpEthAddress = '0x9a760aa1fe631fd9ac0aee0965736121c7c132cc'
 const automateEthAddress = '0x4f15818dc2Ae5FA84D519D88Cb2CAAe9cd18EE6d'
@@ -57,51 +56,6 @@ const rpcUris = {
         "uri" : "https://api.tzkt.io/v1"
     },
 }
-
-/*
-const coingeckoTickers = {
-	"ageur": {"ticker": "ageur", "price": 0},
-	"avax": {"ticker": "avalanche-2", "price": 0},
-	"bnb": {"ticker": "binancecoin", "price": 0},
-	"btc": {"ticker": "bitcoin", "price": 0},
-	"btcb": {"ticker": "binance-bitcoin", "price": 0},
-	"busd": {"ticker": "binance-usd", "price": 0},
-	"dai": {"ticker": "dai", "price": 0},
-	"eth": {"ticker": "ethereum", "price": 0},
-	"euroc": {"ticker": "euro-coin", "price": 0},
-	"eurs": {"ticker": "stasis-eurs", "price": 0},
-	"eurt": {"ticker": "tether-eurt", "price": 0},
-	"ftm": {"ticker": "fantom", "price": 0},
-	"frax": {"ticker": "frax", "price": 0},
-	"jchf": {"ticker": "jarvis-synthetic-swiss-franc", "price": 0},
-	"jeur": {"ticker": "jarvis-synthetic-euro", "price": 0},
-	"jgbp": {"ticker": "jarvis-synthetic-british-pound", "price": 0},
-	"lusd": {"ticker": "liquity-usd", "price": 0},
-	"matic": {"ticker": "matic-network", "price": 0},
-	"mai": {"ticker": "mimatic", "price": 0},
-	"rbtc": {"ticker": "rootstock", "price": 0},
-	"rif": {"ticker": "rif-token", "price": 0},
-	"usdc": {"ticker": "usd-coin", "price": 0},
-	"usdt": {"ticker": "tether", "price": 0},
-	"ust": {"ticker": "terrausd", "price": 0},
-	"wbtc": {"ticker": "wrapped-bitcoin", "price": 0},
-	"weth": {"ticker": "weth", "price": 0},
-	"xchf": {"ticker": "cryptofranc", "price": 0},
-	"xdai": {"ticker": "xdai", "price": 0},
-	"xtz": {"ticker": "tezos", "price": 0},
-
-	// MANUAL
-	"eurl": {"price": 0.970090},
-	"jaud": {"price": 0.6740},
-	"jcad": {"price": 0.7622},
-	"jjpy": {"price": 0.0070},
-	"jsek": {"price": 0.0931},
-	"jsgd": {"price": 0.7117},
-	"jzar": {"price": 0.0572},
-	"rdoc": {"price": 1},
-	"thdx": {"price": 3},
-}
-*/
 
 const collateralJarvis = {
 	"matic_mainnet" : {
@@ -174,14 +128,12 @@ function parseBitcoinBlockchain(btcAddress) {
 
 		if (btcAddress === offrampBtcAddress) {
 			let offrampBalance = balance.toFixed(4)
-			// let offrampValue = offrampBalance * coingeckoTickers["btc"].price
 			let offrampValue = offrampBalance * mtpTickers["BTCEUR"] * mtpTickers["EURUSD"]
 
 			$("#002 span.offramp_balance").text(offrampBalance)
 			$("#002 span.offramp_value").text(offrampValue.toFixed(2))
 		} else {
 			let automateBalance = balance.toFixed(4)
-			// let automateValue = automateBalance * coingeckoTickers["btc"].price
 			let automateValue = automateBalance * mtpTickers["BTCEUR"] * mtpTickers["EURUSD"]
 
 			$("#002 span.automate_balance").text(automateBalance)
@@ -207,26 +159,6 @@ const getBitcoinBalance = async () => {
 	await parseBitcoinBlockchain(offrampBtcAddress)
 	await parseBitcoinBlockchain(automateBtcAddress)
 }
-
-/*
-const getCoingeckoPrice = async () => {
-	let tokenIds = []
-
-	for(ticker in coingeckoTickers) {
-		tokenIds.push(coingeckoTickers[ticker].ticker)
-	}
-
-	const response = await fetch(coingeckoUri + tokenIds.join(","))
-	const prices = await response.json()
-
-	// Hydrate tickers array to add price
-	for (symbol in coingeckoTickers) {
-		if (prices[coingeckoTickers[symbol].ticker]) {
-			coingeckoTickers[symbol].price = prices[coingeckoTickers[symbol].ticker].usd
-		}
-	}
-}
-*/
 
 const getTokensBalance = async (token, i) => {
 	if (token.network === 'bitcoin_mainnet') {
@@ -294,18 +226,12 @@ const getTokensBalance = async (token, i) => {
 		const totalBalanceFormatted = totalBalance.toFixed(toFixed)
 
 		// Values
-		//if (coingeckoTickers[token.symbol.toLowerCase()] === undefined) {
-		//	console.log("DEBUG::coingeckoTickers[token.symbol.toLowerCase()]::" + token.symbol.toLowerCase(), coingeckoTickers[token.symbol.toLowerCase()])
-		//}
-
 		if (mtpTickers[token.symbol + "EUR"] === undefined) {
 			console.log("DEBUG::mtpTickers[token.symbol]::" + token.symbol, mtpTickers[token.symbol])
 		} else {
 			//console.log("DEBUG::Okk::" + token.symbol, mtpTickers[token.symbol])
 		}
 
-		// const offrampValue = coingeckoTickers[token.symbol.toLowerCase()].price * offrampBalanceFormatted
-		// const automateValue = coingeckoTickers[token.symbol.toLowerCase()].price * automateBalanceFormatted
 		const offrampValue = mtpTickers[token.symbol + "EUR"] * offrampBalanceFormatted * mtpTickers["EURUSD"]
 		const newOfframpValue = mtpTickers[token.symbol + "EUR"] * newOfframpBalanceFormatted * mtpTickers["EURUSD"]
 		const automateValue = mtpTickers[token.symbol + "EUR"] * automateBalanceFormatted * mtpTickers["EURUSD"]
@@ -334,9 +260,6 @@ const getTokensBalance = async (token, i) => {
 }
 
 const getTokens = async () => {
-	// Get Coingecko tickers
-	//getCoingeckoPrice()
-
 	// Get MtP tickers
 	await getCurrencyRates()
 
