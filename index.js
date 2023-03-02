@@ -289,6 +289,9 @@ const getTokens = async () => {
 			//if (i == '003') {break}
 		}
     }
+
+	// Add filter menu
+	addFilterMenu();
 }
 
 function getRpcEndpoint(network) {
@@ -509,3 +512,41 @@ $(function(){
 		checkMintingCollateralLiquidity()
 	})
 })
+
+function addFilterMenu() {
+	const table = document.querySelector('table');
+	const rows = table.querySelectorAll('tr');
+	const input = document.createElement('input');
+  
+	input.type = 'text';
+	input.style.width = '500px';
+	input.style.display = 'block';
+	input.style.margin = '20px auto';
+	input.placeholder = 'Filter';
+  
+	document.body.insertBefore(input, table);
+  
+	input.addEventListener('input', function() {
+	  const filterValue = this.value.toLowerCase();
+  
+	  for (let i = 1; i < rows.length; i++) {
+		let rowVisible = false;
+
+		for (let j = 0; j < 3; j++) {
+			const cell = rows[i].cells[j];
+			const cellText = cell.textContent.toLowerCase();
+
+			if (cellText.indexOf(filterValue) > -1) {
+				rowVisible = true;
+				break;
+			}
+		}
+
+		if (rowVisible) {
+			rows[i].style.display = '';
+		} else {
+			rows[i].style.display = 'none';
+		}
+		}
+	});
+};
