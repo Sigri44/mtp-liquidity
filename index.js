@@ -37,7 +37,7 @@ const rpcUris = {
     },
     "optimism_mainnet" : {
         "type" : "custom",
-        "uri" : "https://optimism-mainnet.public.blastapi.io"
+        "uri" : "https://endpoints.omniatech.io/v1/op/mainnet/public"
     },
     "avalanche_mainnet" : {
         "type" : "mtp",
