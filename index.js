@@ -105,7 +105,7 @@ const collateralJarvis = {
 /*
 function forceRecalculateBitcoin() {
 	// Balances
-	let offrampBalance = Number($("#002 span.offramp_balance").text())
+	let offrampBalance = Number($("#002 span.old_offramp_balance").text())
 	let automateBalance = Number($("#002 span.automate_balance").text())
 	let totalBalance = offrampBalance + automateBalance
 	$("#002 span.total_balance").text(totalBalance.toFixed(4))
@@ -130,8 +130,8 @@ function parseBitcoinBlockchain(btcAddress) {
 			let offrampBalance = balance.toFixed(4)
 			let offrampValue = offrampBalance * mtpTickers["BTCEUR"] * mtpTickers["EURUSD"]
 
-			$("#002 span.offramp_balance").text(offrampBalance)
-			$("#002 span.offramp_value").text(offrampValue.toFixed(2))
+			$("#002 span.old_offramp_balance").text(offrampBalance)
+			$("#002 span.old_offramp_value").text(offrampValue.toFixed(2))
 		} else {
 			let automateBalance = balance.toFixed(4)
 			let automateValue = automateBalance * mtpTickers["BTCEUR"] * mtpTickers["EURUSD"]
@@ -143,7 +143,7 @@ function parseBitcoinBlockchain(btcAddress) {
 			//forceRecalculateBitcoin()
 
             // Balances
-            let offrampBalance = Number($("#002 span.offramp_balance").text())
+            let offrampBalance = Number($("#002 span.old_offramp_balance").text())
             let totalBalance = offrampBalance + Number(automateBalance)
             $("#002 span.total_balance").text(totalBalance.toFixed(4))
 
@@ -242,7 +242,7 @@ const getTokensBalance = async (token, i) => {
 		const automateValueFormatted = automateValue.toFixed(2)
 		const totalValueFormatted = totalValue.toFixed(2)
 
-		$("#" + i +" span.offramp_balance").text(offrampBalanceFormatted.toFixed(toFixed))
+		$("#" + i +" span.old_offramp_balance").text(offrampBalanceFormatted.toFixed(toFixed))
 		$("#" + i +" span.new_offramp_balance").text(newOfframpBalanceFormatted.toFixed(toFixed))
 		$("#" + i +" span.automate_balance").text(automateBalanceFormatted.toFixed(toFixed))
 		$("#" + i +" span.total_balance").text(totalBalanceFormatted)
@@ -275,7 +275,7 @@ const getTokens = async () => {
 			+ '<td class="network hidden">' + tokens[i].network + '</td>'
 			+ '<th scope="row">' + i + '</th>'
 			+ '<td class="symbol">' + tokens[i].symbol + '</td>'
-			+ '<td><span class="offramp_balance"></span> (<span class="offramp_value"></span> $)</td>'
+			+ '<td><span class="old_offramp_balance"></span> (<span class="offramp_value"></span> $)</td>'
 			+ '<td><span class="new_offramp_balance"></span> (<span class="new_offramp_value"></span> $)</td>'
 			+ '<td><span class="automate_balance"></span> (<span class="automate_value"></span> $)</td>'
 			+ '<td><span class="total_balance"></span></td>'
