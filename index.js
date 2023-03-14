@@ -2,7 +2,7 @@ const mtpTickers = {}
 const mtpRpcUri = 'https://api.mtpelerin.com/rpc/'
 const mtpTokensUri = 'https://api.mtpelerin.com/currencies/tokens'
 const mtpCurrenciesUri = 'https://api.mtpelerin.com/currency_rates/last'
-const offrampEthAddress = '0x7fb610713c8404e21676c01c271bb662df6eb63c'
+const oldOfframpEthAddress = '0x7fb610713c8404e21676c01c271bb662df6eb63c'
 const newOfframpEthAddress = '0x9a760aa1fe631fd9ac0aee0965736121c7c132cc'
 const automateEthAddress = '0x4f15818dc2Ae5FA84D519D88Cb2CAAe9cd18EE6d'
 const automateThdxAddress = '0xe94799184dfe9a61016c43643029de61b347064c'
@@ -111,9 +111,9 @@ function forceRecalculateBitcoin() {
 	$("#002 span.total_balance").text(totalBalance.toFixed(4))
 
 	// Values
-	let offrampValue = Number($("#002 span.offramp_value").text())
+	let oldOfframpValue = Number($("#002 span.old_offramp_value").text())
 	let automateValue = Number($("#002 span.automate_value").text())
-	let totalValue = offrampValue + automateValue
+	let totalValue = oldOfframpValue + automateValue
 	$("#002 span.crypto_value").text(totalValue.toFixed(2))
 }
 */
@@ -127,11 +127,11 @@ function parseBitcoinBlockchain(btcAddress) {
 		const balance = parseInt(json, 10) / 100000000
 
 		if (btcAddress === offrampBtcAddress) {
-			let offrampBalance = balance.toFixed(4)
-			let offrampValue = offrampBalance * mtpTickers["BTCEUR"] * mtpTickers["EURUSD"]
+			let oldOfframpBalance = balance.toFixed(4)
+			let oldOfframpValue = oldOfframpBalance * mtpTickers["BTCEUR"] * mtpTickers["EURUSD"]
 
-			$("#002 span.old_offramp_balance").text(offrampBalance)
-			$("#002 span.old_offramp_value").text(offrampValue.toFixed(2))
+			$("#002 span.old_offramp_balance").text(oldOfframpBalance)
+			$("#002 span.old_offramp_value").text(oldOfframpValue.toFixed(2))
 		} else {
 			let automateBalance = balance.toFixed(4)
 			let automateValue = automateBalance * mtpTickers["BTCEUR"] * mtpTickers["EURUSD"]
@@ -143,13 +143,13 @@ function parseBitcoinBlockchain(btcAddress) {
 			//forceRecalculateBitcoin()
 
             // Balances
-            let offrampBalance = Number($("#002 span.old_offramp_balance").text())
-            let totalBalance = offrampBalance + Number(automateBalance)
+            let oldOfframpBalance = Number($("#002 span.old_offramp_balance").text())
+            let totalBalance = oldOfframpBalance + Number(automateBalance)
             $("#002 span.total_balance").text(totalBalance.toFixed(4))
 
             // Values
-            let offrampValue = Number($("#002 span.offramp_value").text())
-            let totalValue = offrampValue + Number(automateValue)
+            let oldOfframpValue = Number($("#002 span.old_offramp_value").text())
+            let totalValue = oldOfframpValue + Number(automateValue)
             $("#002 span.crypto_value").text(totalValue.toFixed(2))
 		}
 	})
@@ -164,90 +164,96 @@ const getTokensBalance = async (token, i) => {
 	if (token.network === 'bitcoin_mainnet') {
 		await getBitcoinBalance()
 	} else {
-		let offrampBalanceFormatted = 0
+		let oldOfframpBalanceFormatted = 0
 		let newOfframpBalanceFormatted = 0
 		let automateBalanceFormatted = 0
 
 		let toFixed = 4
 		if (token.isStable) {toFixed = 2}
 
-        if (token.network === "tezos_mainnet") {
-            let endpoint = rpcUris[token.network]["uri"]
+		if (token.network === "tezos_mainnet") {
+		    let endpoint = rpcUris[token.network]["uri"]
 
-            if (token.address === '0x0000000000000000000000000000000000000000') {
-                var offrampBalance = await fetch(endpoint + '/accounts/' + offrampXtzAddress + "/balance")
-                .then(function(response) {return response.json()})
-                var automateBalance = await fetch(endpoint + '/accounts/' + automateXtzAddress + "/balance")
-                .then(function(response) {return response.json()})
-            } else {
-                var offrampBalance = await fetch(endpoint + '/tokens/balances?account=' + offrampXtzAddress + '&token.contract=' + token.address)
-                .then(function(response) {return response.json()})
-                var automateBalance = await fetch(endpoint + '/tokens/balances?account=' + automateXtzAddress + '&token.contract=' + token.address)
-                .then(function(response) {return response.json()})
-            
-                offrampBalance = offrampBalance[0].balance
-                automateBalance = automateBalance[0].balance
-            }
+		    if (token.address === '0x0000000000000000000000000000000000000000') {
+				var oldOfframpBalance = await fetch(endpoint + '/accounts/' + offrampXtzAddress + "/balance")
+				.then(function(response) {return response.json()})
+				var automateBalance = await fetch(endpoint + '/accounts/' + automateXtzAddress + "/balance")
+				.then(function(response) {return response.json()})
+		    } else {
+				var oldOfframpBalance = await fetch(endpoint + '/tokens/balances?account=' + offrampXtzAddress + '&token.contract=' + token.address)
+				.then(function(response) {return response.json()})
+				var automateBalance = await fetch(endpoint + '/tokens/balances?account=' + automateXtzAddress + '&token.contract=' + token.address)
+				.then(function(response) {return response.json()})
 
-            offrampBalanceFormatted = Number(offrampBalance / 1000000)
-            automateBalanceFormatted = Number(automateBalance / 1000000)
-        } else {
-            let endpoint = getRpcEndpoint(token.network)
+				oldOfframpBalance = oldOfframpBalance[0].balance
+				automateBalance = automateBalance[0].balance
+		    }
 
-            const provider = new ethers.providers.JsonRpcProvider(endpoint)
+		    oldOfframpBalanceFormatted = Number(oldOfframpBalance / 1000000)
+		    automateBalanceFormatted = Number(automateBalance / 1000000)
+		} else {
+		    let endpoint = getRpcEndpoint(token.network)
 
-            if (token.address === '0x0000000000000000000000000000000000000000') {
-                const offrampBalance = await provider.getBalance(offrampEthAddress)
-                const newOfframpBalance = await provider.getBalance(newOfframpEthAddress)
-                const automateBalance = await provider.getBalance(automateEthAddress)
-    
-                offrampBalanceFormatted = Number(ethers.utils.formatEther(offrampBalance))
-                newOfframpBalanceFormatted = Number(ethers.utils.formatEther(newOfframpBalance))
-                automateBalanceFormatted = Number(ethers.utils.formatEther(automateBalance))
-            } else {
-                const contract = new ethers.Contract(token.address, basicAbi, provider)
-    
-                const offrampBalance = await contract.balanceOf(offrampEthAddress)
-                const newOfframpBalance = await contract.balanceOf(newOfframpEthAddress)
-                const automateBalance = await contract.balanceOf(automateEthAddress)
-    
-                // THDX
-                /*if (token.address === "0x89d71DfbDD6ebeCd0dfe27D55189F903169d2991") {
-                    automateBalance = await contract.balanceOf(automateThdxAddress)
-                }*/
-    
-                offrampBalanceFormatted = Number(ethers.utils.formatUnits(offrampBalance, token.decimals))
-                newOfframpBalanceFormatted = Number(ethers.utils.formatUnits(newOfframpBalance, token.decimals))
-                automateBalanceFormatted = Number(ethers.utils.formatUnits(automateBalance, token.decimals))
-            }
-        }
+		    const provider = new ethers.providers.JsonRpcProvider(endpoint)
 
-		const totalBalance = offrampBalanceFormatted + newOfframpBalanceFormatted + automateBalanceFormatted
+		    if (token.address === '0x0000000000000000000000000000000000000000') {
+				const oldOfframpBalance = await provider.getBalance(oldOfframpEthAddress)
+				const newOfframpBalance = await provider.getBalance(newOfframpEthAddress)
+				const automateBalance = await provider.getBalance(automateEthAddress)
+
+				oldOfframpBalanceFormatted = Number(ethers.utils.formatEther(oldOfframpBalance))
+				newOfframpBalanceFormatted = Number(ethers.utils.formatEther(newOfframpBalance))
+				automateBalanceFormatted = Number(ethers.utils.formatEther(automateBalance))
+		    } else {
+				const contract = new ethers.Contract(token.address, basicAbi, provider)
+
+				const oldOfframpBalance = await contract.balanceOf(oldOfframpEthAddress)
+				const newOfframpBalance = await contract.balanceOf(newOfframpEthAddress)
+				const automateBalance = await contract.balanceOf(automateEthAddress)
+
+				// THDX
+				/*if (token.address === "0x89d71DfbDD6ebeCd0dfe27D55189F903169d2991") {
+				    automateBalance = await contract.balanceOf(automateThdxAddress)
+				}*/
+
+				oldOfframpBalanceFormatted = Number(ethers.utils.formatUnits(oldOfframpBalance, token.decimals))
+				newOfframpBalanceFormatted = Number(ethers.utils.formatUnits(newOfframpBalance, token.decimals))
+				automateBalanceFormatted = Number(ethers.utils.formatUnits(automateBalance, token.decimals))
+		    }
+		}
+
+		const totalBalance = oldOfframpBalanceFormatted + newOfframpBalanceFormatted + automateBalanceFormatted
 		const totalBalanceFormatted = totalBalance.toFixed(toFixed)
+		
+		tickerValue = oldOfframpValue = newOfframpValue = automateValue = 0
 
 		// Values
 		if (mtpTickers[token.symbol + "EUR"] === undefined) {
 			console.log("DEBUG::mtpTickers[token.symbol]::" + token.symbol, mtpTickers[token.symbol])
+			oldOfframpValue = Number(-1)
+			newOfframpValue = Number(-1)
+			automateValue = Number(-1)
 		} else {
-			//console.log("DEBUG::Okk::" + token.symbol, mtpTickers[token.symbol])
+			tickerValue = mtpTickers[token.symbol + "EUR"]
+			
+			oldOfframpValue = tickerValue * oldOfframpBalanceFormatted * mtpTickers["EURUSD"]
+			newOfframpValue = tickerValue * newOfframpBalanceFormatted * mtpTickers["EURUSD"]
+			automateValue = tickerValue * automateBalanceFormatted * mtpTickers["EURUSD"]
 		}
 
-		const offrampValue = mtpTickers[token.symbol + "EUR"] * offrampBalanceFormatted * mtpTickers["EURUSD"]
-		const newOfframpValue = mtpTickers[token.symbol + "EUR"] * newOfframpBalanceFormatted * mtpTickers["EURUSD"]
-		const automateValue = mtpTickers[token.symbol + "EUR"] * automateBalanceFormatted * mtpTickers["EURUSD"]
-		const totalValue = offrampValue + newOfframpValue + automateValue
+		const totalValue = oldOfframpValue + newOfframpValue + automateValue
 
-		const offrampValueFormatted = offrampValue.toFixed(2)
+		const oldOfframpValueFormatted = oldOfframpValue.toFixed(2)
 		const newOfframpValueFormatted = newOfframpValue.toFixed(2)
 		const automateValueFormatted = automateValue.toFixed(2)
 		const totalValueFormatted = totalValue.toFixed(2)
 
-		$("#" + i +" span.old_offramp_balance").text(offrampBalanceFormatted.toFixed(toFixed))
+		$("#" + i +" span.old_offramp_balance").text(oldOfframpBalanceFormatted.toFixed(toFixed))
 		$("#" + i +" span.new_offramp_balance").text(newOfframpBalanceFormatted.toFixed(toFixed))
 		$("#" + i +" span.automate_balance").text(automateBalanceFormatted.toFixed(toFixed))
 		$("#" + i +" span.total_balance").text(totalBalanceFormatted)
 
-		$("#" + i +" span.offramp_value").text(offrampValueFormatted)
+		$("#" + i +" span.old_offramp_value").text(oldOfframpValueFormatted)
 		$("#" + i +" span.new_offramp_value").text(newOfframpValueFormatted)
 		$("#" + i +" span.automate_value").text(automateValueFormatted)
 
@@ -275,7 +281,7 @@ const getTokens = async () => {
 			+ '<td class="network hidden">' + tokens[i].network + '</td>'
 			+ '<th scope="row">' + i + '</th>'
 			+ '<td class="symbol">' + tokens[i].symbol + '</td>'
-			+ '<td><span class="old_offramp_balance"></span> (<span class="offramp_value"></span> $)</td>'
+			+ '<td><span class="old_offramp_balance"></span> (<span class="old_offramp_value"></span> $)</td>'
 			+ '<td><span class="new_offramp_balance"></span> (<span class="new_offramp_value"></span> $)</td>'
 			+ '<td><span class="automate_balance"></span> (<span class="automate_value"></span> $)</td>'
 			+ '<td><span class="total_balance"></span></td>'
@@ -303,7 +309,7 @@ function getRpcEndpoint(network) {
 }
 
 function calculateLiquidity() {
-    let total = totalValue = stableTotal = cryptoTotal = 0
+    let total = totalValue = stableTotal = cryptoTotal = totalOldOfframp = totalNewOfframp = totalAutomate = 0
 
     // Reset total liquidity
     $(".total_liquidity span").each(function(i, span) {
@@ -328,7 +334,22 @@ function calculateLiquidity() {
 		let newNetworkValue = oldNetworkValue + totalValue
 		oldNetwork.text(newNetworkValue.toFixed(2))
 		total += totalValue
+		
+		// Wallet value
+		oldOfframpValue = Number($(this).find(".old_offramp_value")[0].innerHTML) 
+		totalOldOfframp += oldOfframpValue
+		
+		newOfframpValue = Number($(this).find(".new_offramp_value")[0].innerHTML) 
+		totalNewOfframp += newOfframpValue
+		
+		automateValue = Number($(this).find(".automate_value")[0].innerHTML) 
+		totalAutomate += automateValue
 	})
+
+    $('#total_old_offramp').text(totalOldOfframp.toFixed(2))
+    $('#total_new_offramp').text(totalNewOfframp.toFixed(2))
+    $('#total_automate').text(totalAutomate.toFixed(2))
+
     $('#total_stable').text(stableTotal.toFixed(2))
     $('#total_crypto').text(cryptoTotal.toFixed(2))
     $('#total').text(total.toFixed(2))
