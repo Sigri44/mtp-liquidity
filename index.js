@@ -13,6 +13,7 @@ const automateXtzAddress = 'tz1RmwCe94mBkbnwK8nBd5PHNmy6Q38kSx3u'
 const basicAbi = ["function name() view returns (string)","function symbol() view returns (string)","function balanceOf(address) view returns (uint)"]
 const jFiatsAbiV20 = [{"inputs":[],"name":"totalAvailableLiquidity","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"overCollateralization","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"maxTokensCapacity","outputs":[{"internalType":"uint256","name":"maxCapacity","type":"uint256"}],"stateMutability":"view","type":"function"}]
 const jFiatsAbiV21 = [{"inputs":[],"name":"maxTokensCapacity","outputs":[{"internalType":"uint256","name":"maxCapacity","type":"uint256"}],"stateMutability":"view","type":"function"}]
+const automateCheckLiquidityValue = 4000
 
 const rpcUris = {
     "mainnet" : {
@@ -419,6 +420,16 @@ function colorizeValues() {
 	})
 }
 
+function colorizeAutomate() {
+	// For each id "automate_value", if amount is > 1000, colorize cell in red color
+	$(".automate_value").each(function(i,item) {
+		let value = Number(item.innerHTML)
+		if (value < automateCheckLiquidityValue) {
+			$(this).parent().css("background-color", "rgb(255,0,0)")
+		}
+	})
+}
+
 function setRgbGradient(value, average) {
 	value--;
 
@@ -527,6 +538,7 @@ $(function(){
 		calculateLiquidity()
 		colorizeRows()
 		colorizeValues()
+		colorizeAutomate()
 	})
 
 	$('#button_check_collateral_liquidity').on('click', function () {
