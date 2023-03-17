@@ -425,7 +425,7 @@ function colorizeAutomate() {
 	$(".automate_value").each(function(i,item) {
 		let value = Number(item.innerHTML)
 		if (value < automateCheckLiquidityValue) {
-			$(this).parent().css("background-color", "rgb(255,0,0)")
+			$(this).parent().css("background-color", "rgb(255,124,0)")
 		}
 	})
 }
