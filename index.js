@@ -152,6 +152,7 @@ function parseBitcoinBlockchain(btcAddress) {
             let oldOfframpValue = Number($("#002 span.old_offramp_value").text())
             let totalValue = oldOfframpValue + Number(automateValue)
             $("#002 span.crypto_value").text(totalValue.toFixed(2))
+            $("#002 span.total_value").text(totalValue.toFixed(2))
 		}
 	})
 }
@@ -257,6 +258,7 @@ const getTokensBalance = async (token, i) => {
 		$("#" + i +" span.old_offramp_value").text(oldOfframpValueFormatted)
 		$("#" + i +" span.new_offramp_value").text(newOfframpValueFormatted)
 		$("#" + i +" span.automate_value").text(automateValueFormatted)
+		$("#" + i +" span.total_value").text(totalValueFormatted)
 
 		if (token.isStable) {
 			$("#" + i +" span.stable_value").text(totalValueFormatted)
@@ -285,7 +287,7 @@ const getTokens = async () => {
 			+ '<td><span class="old_offramp_balance"></span> (<span class="old_offramp_value"></span> $)</td>'
 			+ '<td><span class="new_offramp_balance"></span> (<span class="new_offramp_value"></span> $)</td>'
 			+ '<td><span class="automate_balance"></span> (<span class="automate_value"></span> $)</td>'
-			+ '<td><span class="total_balance"></span></td>'
+			+ '<td><span class="total_balance"></span> (<span class="total_value"></span> $)</td>'
 			+ '<td><span class="stable_value" class="right">0</span> $</td>'
 			+ '<td><span class="crypto_value" class="right">0</span> $</td></tr>'
 
@@ -425,9 +427,27 @@ function colorizeAutomate() {
 	$(".automate_value").each(function(i,item) {
 		let value = Number(item.innerHTML)
 		if (value < automateCheckLiquidityValue) {
-			$(this).parent().css("background-color", "rgb(255,124,0)")
+			// $(this).parent().css("background-color", "rgb(255,124,0)")
+			$(this).css({
+                "animation": "blinking 2s infinite",
+				"font-weight": "bold"
+            })
 		}
 	})
+}
+
+function colorizeTotalBalance() {
+    // For each id "automate_value", if amount is < automateCheckLiquidityValue, blink text in black and red
+    $(".total_value").each(function(i,item) {
+        let value = Number(item.innerHTML)
+        if (value > automateCheckLiquidityValue) {
+			//$(this).parent().css("background-color", "rgb(0,255,0,0.5)")
+            $(this).css({
+				"animation": "blinking2 2s infinite",
+				"font-weight": "bold"
+            })
+        }
+    })
 }
 
 function setRgbGradient(value, average) {
@@ -539,6 +559,7 @@ $(function(){
 		colorizeRows()
 		colorizeValues()
 		colorizeAutomate()
+		colorizeTotalBalance()
 	})
 
 	$('#button_check_collateral_liquidity').on('click', function () {
