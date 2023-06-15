@@ -278,7 +278,7 @@ const getTokens = async () => {
 
 	for (i in tokens) {
 		// Remove LN network
-		if (i != '080') {
+		if (i != '080' && i < '083') {
 			// Fill basic informations
 			document.getElementsByTagName("tbody")[0].innerHTML += '<tr id="' + i + '" class="row_crypto">'
 			+ '<td class="network hidden">' + tokens[i].network + '</td>'
