@@ -34,7 +34,7 @@ const rpcUris = {
     },
     "arbitrum_mainnet" : {
         "type" : "custom",
-        "uri" : "https://arbitrum.drpc.org"
+        "uri" : "https://arbitrum.llamarpc.com"
     },
     "optimism_mainnet" : {
         "type" : "custom",
