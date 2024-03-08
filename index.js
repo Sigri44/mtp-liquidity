@@ -566,8 +566,8 @@ function fetchBurnableAmountWithRetry(contract, burnableAmount, token, network, 
             contract.getRedeemTradeInfo(ethers.utils.parseEther(burnableAmount.toString()))
                 .then((getRedeemTradeInfo) => {
                     let collateralAmountReceived = Number(ethers.utils.formatUnits(getRedeemTradeInfo.collateralAmountReceived, decimals));
-                    console.log("Network - Token:", network + " - " + token);
-                    console.log("collateralAmountReceived:", collateralAmountReceived);
+                    // console.log("Network - Token:", network + " - " + token);
+                    // console.log("collateralAmountReceived:", collateralAmountReceived);
 
                     resolve({ burnableAmount, collateralAmountReceived, token, network });
                 })
