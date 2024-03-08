@@ -560,12 +560,12 @@ const checkMintingCollateralLiquidity = async () => {
 	}
 };
 
-function fetchBurnableAmountWithRetry(contract, burnableAmount, token, network, retryCount = 12) {
+function fetchBurnableAmountWithRetry(contract, burnableAmount, token, network, decimals, retryCount = 12) {
     return new Promise((resolve, reject) => {
         function attemptFetch(retriesLeft) {
             contract.getRedeemTradeInfo(ethers.utils.parseEther(burnableAmount.toString()))
                 .then((getRedeemTradeInfo) => {
-                    let collateralAmountReceived = Number(ethers.utils.formatUnits(getRedeemTradeInfo.collateralAmountReceived, 6));
+                    let collateralAmountReceived = Number(ethers.utils.formatUnits(getRedeemTradeInfo.collateralAmountReceived, decimals));
                     console.log("Network - Token:", network + " - " + token);
                     console.log("collateralAmountReceived:", collateralAmountReceived);
 
@@ -617,14 +617,16 @@ const checkBurningCollateralLiquidity = async () => {
 			const burnableAmount = 10000;
 			switch (collateralJarvis[network].version) {
 				case "2.0":
-					promise = fetchBurnableAmountWithRetry(contract, burnableAmount, token, network)
+					decimals = 18
+					promise = fetchBurnableAmountWithRetry(contract, burnableAmount, token, network, decimals)
 						.catch((error) => {
 							// console.error("Error fetching redeem trade info after retries:", error);
 							return { burnableAmount: -1, collateralAmountReceived: -1, token, network };
 						});
 					break
 				case "2.1":
-					promise = fetchBurnableAmountWithRetry(contract, burnableAmount, token, network)
+					decimals = 6
+					promise = fetchBurnableAmountWithRetry(contract, burnableAmount, token, network, decimals)
 						.catch((error) => {
 							// console.error("Error fetching redeem trade info after retries:", error);
 							return { burnableAmount: -1, collateralAmountReceived: -1, token, network };
