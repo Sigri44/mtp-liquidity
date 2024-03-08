@@ -11,8 +11,8 @@ const automateBtcAddress = 'bc1q6e8d0vqketn9p7t9nkukcfz4aupereap3r7j6x'
 const offrampXtzAddress = 'tz1X59JYm8fSFPo3H18wh7VxiRgDCPXMttPM'
 const automateXtzAddress = 'tz1RmwCe94mBkbnwK8nBd5PHNmy6Q38kSx3u'
 const basicAbi = ["function name() view returns (string)","function symbol() view returns (string)","function balanceOf(address) view returns (uint)"]
-const jFiatsAbiV20 = [{"inputs":[],"name":"totalAvailableLiquidity","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"overCollateralization","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"maxTokensCapacity","outputs":[{"internalType":"uint256","name":"maxCapacity","type":"uint256"}],"stateMutability":"view","type":"function"}]
-const jFiatsAbiV21 = [{"inputs":[],"name":"maxTokensCapacity","outputs":[{"internalType":"uint256","name":"maxCapacity","type":"uint256"}],"stateMutability":"view","type":"function"}]
+const jFiatsAbiV20 = [{"inputs":[],"name":"totalAvailableLiquidity","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"overCollateralization","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"maxTokensCapacity","outputs":[{"internalType":"uint256","name":"maxCapacity","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"syntheticTokens","type":"uint256"}],"name":"getRedeemTradeInfo","outputs":[{"internalType":"uint256","name":"collateralAmountReceived","type":"uint256"},{"internalType":"uint256","name":"feePaid","type":"uint256"}],"stateMutability":"view","type":"function"}]
+const jFiatsAbiV21 = [{"inputs":[],"name":"maxTokensCapacity","outputs":[{"internalType":"uint256","name":"maxCapacity","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"_syntTokensAmount","type":"uint256"}],"name":"getRedeemTradeInfo","outputs":[{"internalType":"uint256","name":"collateralAmountReceived","type":"uint256"},{"internalType":"uint256","name":"feePaid","type":"uint256"}],"stateMutability":"view","type":"function"}]
 const automateCheckLiquidityValue = 4000
 
 const rpcUris = {
@@ -34,7 +34,7 @@ const rpcUris = {
     },
     "arbitrum_mainnet" : {
         "type" : "custom",
-        "uri" : "https://arb1.arbitrum.io/rpc"
+        "uri" : "https://arbitrum.drpc.org"
     },
     "optimism_mainnet" : {
         "type" : "custom",
@@ -88,11 +88,18 @@ const collateralJarvis = {
 			"jEUR": "0x0aA7e2A631198ba957f8335a6FAC6F3B8F53bD0E",
 		},
 	},
+	// "avalanche_mainnet" : {
+	// 	"version": "2.0",
+	// 	"tokens": {
+	// 		"jCHF": "0x9fbad00ae18fae064c728e6b535a6cb950c8c40a",
+	// 		"jEUR": "0x0aA7e2A631198ba957f8335a6FAC6F3B8F53bD0E",
+	// 	},
+	// },
 	"avalanche_mainnet" : {
-		"version": "2.0",
+		"version": "2.1",
 		"tokens": {
-			"jCHF": "0x9fbad00ae18fae064c728e6b535a6cb950c8c40a",
-			"jEUR": "0x0aA7e2A631198ba957f8335a6FAC6F3B8F53bD0E",
+			"jCHF": "0xBAe7aD32CB5bb34416D98971e68f3693B0fa7787",
+			"jEUR": "0x8E10F9df88d7C89B8f468D1aA3D3867dae79d155",
 		},
 	},
 	"optimism_mainnet" : {
@@ -101,6 +108,12 @@ const collateralJarvis = {
 			"jEUR": "0xb145fb1ef8e3b0202af4012f6bebc00e6882a10d",
 		},
 	},
+	// "arbitrum_mainnet" : {
+	// 	"version": "2.1",
+	// 	"tokens": {
+	// 		"jEUR": "0xdb97f7a816e91a94ef936145e1b9faee14b8c25c",
+	// 	},
+	// },
 }
 
 /*
@@ -295,7 +308,7 @@ const getTokens = async () => {
 			getTokensBalance(tokens[i], i)
 
 			// TODO : Limit debug trace
-			//if (i == '003') {break}
+			if (i == '001') {break}
 		}
     }
 
@@ -499,20 +512,22 @@ const checkMintingCollateralLiquidity = async () => {
 			let promise
 			switch (collateralJarvis[network].version) {
 				case "2.0":
-					promise = contract.totalAvailableLiquidity().then((totalAvailableLiquidity) => {
-						return contract.overCollateralization().then((overCollateralization) => {
-						let mintableValue = totalAvailableLiquidity / overCollateralization
-						let mintableAmount = mintableValue / mtpTickers[token + "EUR"]
-						return { mintableAmount, token, network }
-						})
+					promise = contract.totalAvailableLiquidity().then(async (totalAvailableLiquidity) => {
+						const overCollateralization = await contract.overCollateralization();
+
+                        let mintableValue = totalAvailableLiquidity / overCollateralization
+                        let mintableAmount = mintableValue / mtpTickers[token + "EUR"]
+
+                        return { mintableAmount, token, network }
 					})
 					break
 				case "2.1":
 					promise = contract
 						.maxTokensCapacity()
 						.then((collateralAmount) => {
-						let mintableAmount = Number(ethers.utils.formatEther(collateralAmount))
-						return { mintableAmount, token, network }
+							let mintableAmount = Number(ethers.utils.formatEther(collateralAmount))
+
+							return { mintableAmount, token, network }
 						})
 					break
 				default:
@@ -521,20 +536,110 @@ const checkMintingCollateralLiquidity = async () => {
 			promises.push(promise);
 		});
 
-		Promise.all(promises).then((result) => {
-			result.forEach(({ mintableAmount, token, network }) => {
-				$("." + network).append(
-				'<div class="col center borderLine"><span id="' +
-					network +
-					"_" +
-					token +
-					'" class="right"></span>' +
-					mintableAmount.toFixed(2) +
-					" " +
-					token +
-					"</div>"
-				)
-			})
+		const result = await Promise.all(promises);
+
+		result.forEach(({ mintableAmount, token, network }) => {
+			$("." + network).append(
+				'<div class="col center borderLine">Mint : <span id="minting_' +
+				network +
+				"_" +
+				token +
+				'" class="left">' +
+				mintableAmount.toFixed(2) +
+				'</span><br>' +
+				'Burn : <span id="burning_' +
+				network +
+				"_" +
+				token +
+				'" class="right"></span><br>' +
+				" " +
+				token +
+				'</div>'
+			)
+		})
+	}
+};
+
+function fetchBurnableAmountWithRetry(contract, burnableAmount, token, network, retryCount = 12) {
+    return new Promise((resolve, reject) => {
+        function attemptFetch(retriesLeft) {
+            contract.getRedeemTradeInfo(ethers.utils.parseEther(burnableAmount.toString()))
+                .then((getRedeemTradeInfo) => {
+                    let collateralAmountReceived = Number(ethers.utils.formatUnits(getRedeemTradeInfo.collateralAmountReceived, 6));
+                    console.log("Network - Token:", network + " - " + token);
+                    console.log("collateralAmountReceived:", collateralAmountReceived);
+
+                    resolve({ burnableAmount, collateralAmountReceived, token, network });
+                })
+                .catch((error) => {
+                    // console.error("Error fetching redeem trade info:", error);
+                    if (retriesLeft > 0) {
+                        // console.log(`Retrying... ${retriesLeft} retries left.`);
+                        // Réduit burnableAmount de moitié
+                        burnableAmount /= 2;
+                        attemptFetch(retriesLeft - 1);
+                    } else {
+                        console.error("Max retry attempts reached for " + token + " on " + network + ". Unable to fetch burnableAmount.");
+                        reject(error);
+                    }
+                });
+        }
+
+        attemptFetch(retryCount);
+    });
+}
+
+const checkBurningCollateralLiquidity = async () => {
+	for (const network in collateralJarvis) {
+		let endpoint = getRpcEndpoint(network)
+		const provider = new ethers.providers.JsonRpcProvider(endpoint)
+
+		var abi = undefined
+
+		switch (collateralJarvis[network].version) {
+			case "2.0":
+				abi = jFiatsAbiV20
+				break
+			case "2.1":
+				abi = jFiatsAbiV21
+				break
+			default:
+		}
+  
+		// Create an array to hold the promises
+		const promises = []
+
+		Object.keys(collateralJarvis[network].tokens).forEach(async (token) => {
+			let contractAddress = collateralJarvis[network].tokens[token]
+			const contract = new ethers.Contract(contractAddress, abi, provider)
+
+			let promise
+			const burnableAmount = 10000;
+			switch (collateralJarvis[network].version) {
+				case "2.0":
+					promise = fetchBurnableAmountWithRetry(contract, burnableAmount, token, network)
+						.catch((error) => {
+							// console.error("Error fetching redeem trade info after retries:", error);
+							return { burnableAmount: -1, collateralAmountReceived: -1, token, network };
+						});
+					break
+				case "2.1":
+					promise = fetchBurnableAmountWithRetry(contract, burnableAmount, token, network)
+						.catch((error) => {
+							// console.error("Error fetching redeem trade info after retries:", error);
+							return { burnableAmount: -1, collateralAmountReceived: -1, token, network };
+						});
+					break
+				default:
+			}
+
+			promises.push(promise);
+		});
+
+		const result = await Promise.all(promises);
+
+		result.forEach(({ burnableAmount, collateralAmountReceived, token, network }) => {
+			$("#burning_" + network + "_" + token).text(burnableAmount.toFixed(2) + '('+collateralAmountReceived.toFixed(2)+'$)')
 		})
 	}
 };
@@ -563,7 +668,9 @@ $(function(){
 	})
 
 	$('#button_check_collateral_liquidity').on('click', function () {
-		checkMintingCollateralLiquidity()
+		checkMintingCollateralLiquidity().then(() => {
+			return checkBurningCollateralLiquidity();
+		});
 	})
 })
 
